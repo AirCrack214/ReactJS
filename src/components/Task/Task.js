@@ -1,19 +1,30 @@
 import React from 'react'
-import classes from './Task.module.css'
 
-import Button from '../Button/Button'
 
-const Task = ({ id, name, desc, status, onClick }) => {
-    const cls = [classes.task]
-    status ? cls.push(classes.completed) : cls.push(classes.incompleted)
+import Button from '../UI/Button/Button'
 
+
+import { ThemeContext } from "../App/ThemeContext"
+
+
+import classes from './Task.module.scss'
+import classnames from "classnames/bind"
+const cx = classnames.bind(classes)
+
+const Task = ({ id, name, description, completed, onClick }) => {
+    const classTaskStatus = completed ? classes.completed : classes.incompleted // возвратим разные классы в зависимости от completed-статуса таски
     return (
-      <div id={id} className={cls.join(' ')}>
-          <h2>{name}</h2>
-          <p>{desc}</p>
-          { status ? <Button btnName='Не готово' onClick={() => onClick(id)}/> : <Button btnName='Готово' onClick={() => onClick(id)}/> }
-      </div>
-    )
-  }
+      <ThemeContext.Consumer>
+        {theme => (
+            // в зависимости от темы приложения и completed-статуса таски возвращаем стили
+            <div id={id} className={cx('task', `task-theme-${theme}`, `${classTaskStatus}`)}> 
+                <h2>{name}</h2>
+                <p>{description}</p>
+                { completed ? <Button btnName='Undone' onClick={() => onClick(id)}/> : <Button btnName='Done' onClick={() => onClick(id)}/> }
+            </div>
+        )}
+      </ThemeContext.Consumer>
+    )}
+
 
 export default Task

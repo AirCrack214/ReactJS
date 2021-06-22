@@ -6,12 +6,12 @@ const TaskList = ( {tasksList, onClick} ) => {
         tasksList.map( task => {
             return (
                 <Task
-                    key = {task.id}
-                    id = {task.id}
-                    name = {task.name}
-                    desc = {task.desc}
-                    status = {task.status}
-                    onClick = {onClick}
+                    key={task.id}
+                    id={task.id}
+                    name={task.name}
+                    description={task.description}
+                    completed={task.completed}
+                    onClick={onClick}
                 />
             )
         })
