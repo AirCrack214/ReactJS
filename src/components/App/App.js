@@ -1,103 +1,164 @@
 import React from 'react'
 import '../App/App.scss';
-import MyTodoList from '../MyTodoList/MyTodoList'
-import Switch from '../UI/Switch/Switch'
+import { BrowserRouter, Route, Switch} from "react-router-dom"
+
+
+
+import HomePage from './HomePage/HomePage'
+import ProjectsPage from '../ProjectsPage/ProjectsPage'
+import ProjectPage from '../ProjectPage/ProjectPage'
+import PageNotFound from './PageNotFound/PageNotFound'
+
+
 import { DEFAULT_THEME, ThemeContext } from "./ThemeContext"
 
-import classes from './App.scss'
-import classnames from "classnames/bind"
-const cx = classnames.bind(classes)
+import projects from '../ProjectsData/projectsData'
+import normalizeState from '../ProjectsData/stateNormalizer'
+
+
+const {projectsById, tasksById} = normalizeState(projects)
 
 class App extends React.Component {
   state = {
     theme: DEFAULT_THEME,
-    tasks: [
-      {
-        id: 1,
-        name: 'Домашние задания',
-        desc: 'Доделать все задания по учебе до дедлайнов',
-        status: false,
-      },
-      {
-        id: 2,
-        name: 'Бот',
-        desc: 'Закончить модуль создания аккаунтов в боте',
-        status: false,
-      },
-      {
-        id: 3,
-        name: 'Магазин',
-        desc: 'Зайти в магазин за продуктами',
-        status: true,
-      },
-      {
-        id: 4,
-        name: 'Экзамен',
-        desc: 'Сдать экзамен по стратегическому менеджменту',
-        status: false,
-      },
-      {
-        id: 5,
-        name: 'Практика',
-        desc: 'Подать заявление на практику',
-        status: true,
-      }
-    ]
+    themeTurnedToDark: false,
+    projectsById, 
+    tasksById
   };
 
-  handleTaskStatus = (taskID) => {
-    const taskToChange_id = this.state.tasks.findIndex((task) => task.id === taskID); 
-    this.setState((currentState) => {
-      const newTasksList = [...currentState.tasks]
-      newTasksList[taskToChange_id] = { ...newTasksList[taskToChange_id], completed: !currentState.tasks[taskToChange_id].completed }
-      return {
-        tasks: newTasksList
-      }
-    })
+  changeTaskStatusHandler = (taskId) => {
+    const taskToChange = this.state.tasksById[taskId]
+    const taskToChange_updatedStatus = { ...taskToChange, completed: !taskToChange.completed }
+
+    this.setState( (currentState) => ({
+        tasksById: {
+          ...currentState.tasksById, 
+          [taskId]: taskToChange_updatedStatus
+        }
+    }))
   }
 
-  submitHandler = (name, value) => {
-    name&&value ? this.setState( (currentState) => {
-      const newTasksList = [...currentState.tasks]
-      const tasksLastID = newTasksList.length
-      newTasksList[tasksLastID] = {
-        id: tasksLastID+1,
-        name: name,
-        description: value,
+  taskAddHandler = (projectId, taskName, taskDescription) => {
+    taskName&&taskDescription 
+    ? this.setState( (currentState) => {
+      const projectTasksIdsList = [...currentState.projectsById[projectId].tasksIds]
+      const tasksList = {...currentState.tasksById};
+      
+      function getLastId(tasks) {
+        let lastId = 0
+        for (let task in tasks) {
+          if (lastId <= task) {
+            lastId++
+          } else {return lastId}
+        }
+        return lastId
+      }
+
+      const lastTask_id = getLastId(tasksList)
+      const newTask_id = lastTask_id+1
+      const projectNewTask_id = getLastId(projectTasksIdsList)
+
+      projectTasksIdsList[projectNewTask_id] = newTask_id
+
+      tasksList[newTask_id] = {
+        id: newTask_id,
+        name: taskName,
+        description: taskDescription,
         completed: false
-      } 
+      }
 
       return {
-        tasks: newTasksList
+        projectsById: {
+          ...currentState.projectsById,
+          [projectId]: { ...currentState.projectsById[projectId], 
+              tasksIds: projectTasksIdsList
+          }
+        },
+        tasksById: tasksList
       }
-    })
-    : alert('Enter name and description!')
+      
+    } )
+    : alert('Enter NEW TASK name and description')
   }
 
-  // Смена темы
-  themeChangeHadnler = (event) => {
+  themeChangeHandler = (event) => {
     const themeMode = event.target.checked ? 'dark' : 'light'
-    this.setState( {theme: themeMode} )
+    this.setState( {theme: themeMode, themeTurnedToDark: !this.state.themeTurnedToDark} )
+  }
+
+  onProjectAddHandler = (projectName, projectDescription) => {
+    function setNewProjectId(projects) {
+      let lastId = 0
+      for (let projectId in projects) {
+        if (lastId <= projectId) {
+          lastId++
+        } else {return ++lastId}
+      }
+      return ++lastId
+    }
+
+    projectName&&projectDescription 
+    ? this.setState( (currentState) => {
+        const newProjectsList = {...currentState.projectsById}
+        const projectToBeAddedID = setNewProjectId(newProjectsList)
+        newProjectsList[projectToBeAddedID] = {
+          id: projectToBeAddedID,
+          name: projectName,
+          description: projectDescription,
+          tasksIds: []
+        }
+        return {
+          projectsById: newProjectsList
+        }
+    })
+    : alert('Enter PROJECT name and description!') 
   }
 
   render() {
     return (
-      <section className={cx('application-wrapper', `application-wrapper-theme-${this.state.theme}`)}>
-        <div className={cx('tasks-wrapper__layout')}>
-          <ThemeContext.Provider value={this.state.theme}>
-            <>
-              <Switch
-                  themeChangeHadnler={this.themeChangeHadnler}
+      <BrowserRouter>
+        <ThemeContext.Provider value={this.state.theme}>
+          <Switch>
+            <Route exact path='/'>
+              <HomePage 
+                themeChangeHandler={this.themeChangeHandler}
+                themeTurnedToDark={this.state.themeTurnedToDark}
               />
-              <MyTodoList 
-                  tasks={this.state.tasks}
-                  submitHandler={this.submitHandler}
-                  handleTaskStatus={this.handleTaskStatus}
+            </Route>
+            <Route exact path='/projects'>
+                <ProjectsPage 
+                  projectsById={this.state.projectsById} 
+                  tasksById={this.state.tasksById}
+                  themeChangeHandler={this.themeChangeHandler}
+                  onProjectAddHandler={this.onProjectAddHandler}
+                  themeTurnedToDark={this.state.themeTurnedToDark}
+                />
+            </Route>
+            <Route exact path='/projects/:projectId'>
+                <ProjectPage
+                  projectsById={this.state.projectsById} 
+                  tasksById={this.state.tasksById}
+                  taskAddHandler={this.taskAddHandler}
+                  changeTaskStatusHandler={this.changeTaskStatusHandler}
+                  themeChangeHandler={this.themeChangeHandler}
+                  themeTurnedToDark={this.state.themeTurnedToDark}
+                />
+            </Route>
+            <Route>
+              <PageNotFound 
+                themeChangeHandler={this.themeChangeHandler}
+                themeTurnedToDark={this.state.themeTurnedToDark}
               />
-            </>
-          </ThemeContext.Provider>
-        </div>
-      </section>
+            </Route>
+            <Route exact path='/404'>
+              <PageNotFound 
+                themeChangeHandler={this.themeChangeHandler}
+                themeTurnedToDark={this.state.themeTurnedToDark}
+              />
+            </Route>
+          </Switch>
+        </ThemeContext.Provider>
+      </BrowserRouter>
     )
   }
 }
