@@ -1,22 +1,10 @@
 import './App.css';
 import React from 'react';
 
-const Task = ({id, name,  desc, status}) => {
-  const handleClick = () => {
-    console.log(`Task ${id} status ${status}`)
-  }
+import TaskList from './components/TaskList/TaskList'
+import TaskAdd from './components/TaskAdd/TaskAdd';
 
-  return (
-    <div className='task'>
-      <h2>{name}</h2>
-      <div>{desc}</div>
-      <div>{status}</div>
-      <button onClick={handleClick} className='button'>
-        <h3>State</h3>
-      </button>
-    </div>
-  )
-}
+
 
 const App = () => {
   return (
@@ -59,20 +47,45 @@ class TodoList extends React.Component {
       }
     ]
   }
+  handleTaskStatus = (taskID) => {
+    const taskToChange_id = this.state.tasks.findIndex((task) => task.id === taskID);
+    this.setState((currentState) => {
+      const newList = [...currentState.tasks]
+      newList[taskToChange_id] = { ...newList[taskToChange_id], status: !currentState.tasks[taskToChange_id].status }
+      return {
+        tasks: newList
+      }
+    })
+  }
 
-  render () {
-    return(
-      <div>
-        <header><h1>Список дел</h1></header>
-        <div>
-          {this.state.tasks.map(task =>
-            <Task id={task.id} name={task.name} desc={task.desc} status={task.status}/>
-          )}
-        </div>
-      </div>
-      )
+  submitHandler = (name, value) => {
+    name && value ? this.setState( (currentState) => { 
+      const newList = [...currentState.tasks]
+      const idsLen = newList.length
+      newList[idsLen] = {
+        id: idsLen + 1,
+        name: name,
+        desc: value,
+        status: false
+      } 
+
+      return {
+        tasks: newList
+      }
+    })
+    : alert('Отсутствует ввод')
+  }
+
+  render() {
+    const tasks = this.state.tasks 
+
+    return (
+      <>
+        <TaskAdd submitHandler={this.submitHandler}/>
+        <TaskList tasksList={tasks} onClick={this.handleTaskStatus}/>
+      </>
+    )    
   }
 }
-
 
 export default App;

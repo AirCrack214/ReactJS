@@ -1,0 +1,51 @@
+.task {
+    cursor: pointer;
+    position: relative;
+    padding: 8x 8px 8px 8px;
+    text-align: left;
+    list-style-type: none;
+    background: #eee;
+    font-size: 18px;
+    transition: 0.2s;
+    border-radius: 20px;
+    border-color: #222;
+    padding: 1.5rem 3rem;
+
+    border-radius: 20px;
+    background: rgb(255, 255, 255);
+
+  }
+
+
+.completed:before {
+    content:'';
+
+    position: relative;
+    margin-bottom: 1.5rem;
+    
+    display: block;
+    
+    height: 60px;
+    width: 60px;
+
+    background: no-repeat center/100% url('./icons//completed.svg');
+}
+.incompleted::before {
+    content:'';
+
+    position: relative;
+    margin-bottom: 1.5rem;
+    
+    display: block;
+    
+    height: 60px;
+    width: 60px;
+
+    background: no-repeat center/100% url('./icons//incompleted.svg');
+}
+
+@media (max-width: 1200px) {
+    .task {
+        max-width: 50%;
+    }
+}
