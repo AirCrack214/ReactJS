@@ -1,30 +1,48 @@
 import React from 'react'
+import {connect} from 'react-redux'
+import { handleTaskStatusChange } from '../../../../../actions/tasks/tasks'
 
 
-import Button from '../../../../UI/Button/Button'
-
-
-import { ThemeContext } from "../../../../App/ThemeContext"
+import {Button} from '../../../../UI/Button/Button'
 
 
 import classes from './Task.module.scss'
 import classnames from "classnames/bind"
 const cx = classnames.bind(classes)
 
-const Task = ({ id, name, description, completed, onClick }) => {
-    const classTaskStatus = completed ? classes.completed : classes.incompleted // возвратим разные классы в зависимости от completed-статуса таски
+const mapStateToProps = (state) => (
+    {
+        theme: state.themeState.theme,
+        tasks: state.tasksByIds.tasks
+    }
+)
+
+const mapDispatchToProps = (dispatch) => ({
+    dispatchOnStatusChange: (id, status) => dispatch(handleTaskStatusChange(id, status))
+})
+
+const TaskComponent = (
+    { 
+        theme, 
+        tasks,
+        id,
+        dispatchOnStatusChange
+    }) => {
+    const thisTask = tasks[id]
+    const classTaskStatus = thisTask.completed ? classes.completed : classes.incompleted // возвратим разные классы в зависимости от completed-статуса таски
     return (
-      <ThemeContext.Consumer>
-        {theme => (
             // в зависимости от темы приложения и completed-статуса таски возвращаем стили
             <div id={id} className={cx('task', `task-theme-${theme}`, `${classTaskStatus}`)}> 
-                <h2>{name}</h2>
-                <p>{description}</p>
-                { completed ? <Button btnName='Undone' onClick={() => onClick(id)}/> : <Button btnName='Done' onClick={() => onClick(id)}/> }
+                <h2>{thisTask.name}</h2>
+                <p>{thisTask.description}</p>
+                { 
+                thisTask.completed 
+                    ? <Button btnName='Undone' onClick={() => dispatchOnStatusChange(thisTask.id, thisTask.completed)}/> 
+                    : <Button btnName='Done' onClick={() => dispatchOnStatusChange(thisTask.id, thisTask.completed)}/> 
+                }
             </div>
         )}
-      </ThemeContext.Consumer>
-    )}
 
 
-export default Task
+
+export const Task = connect(mapStateToProps, mapDispatchToProps)(TaskComponent)

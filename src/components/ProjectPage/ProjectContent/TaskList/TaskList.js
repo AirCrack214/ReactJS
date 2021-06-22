@@ -1,20 +1,37 @@
 import React from 'react'
-import Task from './Task/Task'
-import {Redirect} from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
+import { connect } from 'react-redux'
+import {Task} from './Task/Task'
 
+const mapStateToProps = (state) => {
+    return({
+        tasks: state.tasksByIds.tasks,
+        projects: state.projectsByIds.projects
+    })
+}
 
-const TaskList = ( {tasksList, onClick} ) => {
-    if (tasksList) {
+const TaskListComponent = ( {projectId, projects, tasks} ) => {
+    const searchForTask = (tasksIds, tasksList) => {
+        const specificTasksList = {}
+        Object.values(tasksIds)?.map( taskId => {
+            return Object.values(tasksList).map( (task) => {
+                return task.id.toString() === taskId.toString() 
+                ? specificTasksList[taskId] = task
+                : null
+            })
+        })
+        return specificTasksList
+    }
+    const projectTasksIds = projects[projectId]?.tasksIds
+    const projectTasks = searchForTask(projectTasksIds, tasks)
+
+    if (projectTasks) {
         return (
-            tasksList.map( task => {
+            Object.values(projectTasks).map( task => {
                 return (
                     <Task
                         key={task.id}
                         id={task.id}
-                        name={task.name}
-                        description={task.description}
-                        completed={task.completed}
-                        onClick={onClick}
                     />
                 )
             })
@@ -25,4 +42,4 @@ const TaskList = ( {tasksList, onClick} ) => {
     }
 }
 
-export default TaskList
+export const TaskList = connect(mapStateToProps)(TaskListComponent)

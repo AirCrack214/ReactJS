@@ -2,8 +2,8 @@ import React from 'react'
 
 
 import ProjectHeader from './ProjectHeader/ProjectHeader'
-import TaskList from './TaskList/TaskList'
-import TaskAdd from './TaskAdd/TaskAdd';
+import {TaskList} from './TaskList/TaskList'
+import {TaskAdd} from './TaskAdd/TaskAdd';
 
 
 import classes from './ProjectContent.module.scss'
@@ -25,11 +25,9 @@ class ProjectContent extends React.Component {
         <div className={cx('tasks-wrapper__layout')}>
           <TaskAdd
               projectId={projectId}
-              taskAddHandler={this.props.taskAddHandler}
           />
           <TaskList
-              tasksList={tasks}
-              onClick={this.props.changeTaskStatusHandler}
+              projectId={projectId}
           />
         </div>
       </>
