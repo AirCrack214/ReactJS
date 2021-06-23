@@ -1,7 +1,7 @@
 import React from 'react'
 
 import TextInput from './TextInput/TextInput'
-import Button from '../Button/Button'
+import Button from '../UI/Button/Button'
 
 class TaskInput extends React.Component {
     state = {
@@ -20,13 +20,12 @@ class TaskInput extends React.Component {
     }
   
     render() {
-  
       return (
         <form onSubmit={this.handleSubmit}>
           <fieldset>
             <TextInput 
                 name="taskName" 
-                placeholder='Введите название задачи'
+                placeholder='Enter task name'
                 size=''
                 isRequired='true'
                 value={this.state.name} 
@@ -34,14 +33,14 @@ class TaskInput extends React.Component {
             />
             <TextInput 
                 name='taskDescription'
-                placeholder='Введите описание задачи'
+                placeholder='Enter task description'
                 size=''
                 isRequired='true'
-                value={this.state.desc} 
+                value={this.state.description} 
                 onChange={this.handleChange} 
             />
             <Button 
-                btnName={'Создать'}
+                btnName={'Submit'}
                 type={'submit'}
             />
           </fieldset>
