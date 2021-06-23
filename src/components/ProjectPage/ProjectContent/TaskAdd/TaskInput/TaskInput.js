@@ -1,9 +1,23 @@
 import React from 'react'
-
+import {connect} from 'react-redux'
 import TextInput from './TextInput/TextInput'
-import Button from '../../../../UI/Button/Button'
+import {Button} from '../../../../UI/Button/Button'
+import { handleTaskAdd } from '../../../../../actions/tasks/tasks'
+import { handleProjectTaskAdd } from '../../../../../actions/projects/projects'
 
-class TaskInput extends React.Component {
+const mapStateToProps = (state) => {
+  return ({
+    tasks: state.tasksByIds.tasks,
+    projects: state.projectsByIds.projects
+  })
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  dispatchOnTaskAdd: (projectId, taskId, taskName, taskDescription) => dispatch(handleTaskAdd(projectId, taskId, taskName, taskDescription)),
+  dispatchOnPojectTaskAdd: (projectId, taskId, taskName, taskDescription, taskStatus) => dispatch(handleProjectTaskAdd(projectId, taskId, taskName, taskDescription, taskStatus))
+})
+
+class TaskInputComponent extends React.Component {
     state = {
       taskName: '',
       taskDescription: '',
@@ -16,7 +30,12 @@ class TaskInput extends React.Component {
 
     handleSubmit = (event) => {
       event.preventDefault()
-      return this.props.taskAddHandler(this.props.projectId, this.state.taskName, this.state.taskDescription)
+      const projectId = this.props.projectId
+      const newTaskId = ++Object.keys(this.props.tasks)[Object.keys(this.props.tasks).length-1] // id новой таски = id последней + 1
+      return [ 
+        this.props.dispatchOnTaskAdd(projectId, newTaskId, this.state.taskName, this.state.taskDescription),
+        this.props.dispatchOnPojectTaskAdd(projectId, newTaskId, this.state.taskName, this.state.taskDescription, false)
+      ]
     }
   
     render() {
@@ -27,7 +46,7 @@ class TaskInput extends React.Component {
                 name="taskName" 
                 placeholder='Enter task name'
                 size=''
-                isRequired='true'
+                isRequired='1'
                 value={this.state.name} 
                 onChange={this.handleChange} 
             />
@@ -35,7 +54,7 @@ class TaskInput extends React.Component {
                 name='taskDescription'
                 placeholder='Enter task description'
                 size=''
-                isRequired='true'
+                isRequired='1'
                 value={this.state.description} 
                 onChange={this.handleChange} 
             />
@@ -50,4 +69,4 @@ class TaskInput extends React.Component {
   }
   
   
-  export default TaskInput
+  export const TaskInput = connect(mapStateToProps, mapDispatchToProps)(TaskInputComponent)
